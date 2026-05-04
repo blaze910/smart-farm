@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: #020617;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at top, rgba(72,187,120,0.16), transparent 24%),
+    linear-gradient(180deg, #08101f 0%, #020617 45%, #050a12 100%);
+  color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .farm-hero-bg {
+    background-position: top;
+  }
+}
+
+button,
+a {
+  font: inherit;
+  cursor: pointer;
+}
+
+.farm-hero-bg {
+  background-image:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.15), rgba(2, 6, 23, 0.70)),
+    url("/farm-bg.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.glass-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 0 40px 120px -40px rgba(2, 12, 27, 0.85), 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  background-clip: padding-box;
+}
+
+.glass-strong {
+  background: rgba(15, 23, 42, 0.32);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 48px 140px -48px rgba(0, 0, 0, 0.75), 0 2px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+}
+
+.glass-panel {
+  background: rgba(15, 23, 42, 0.40);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 24px 80px -40px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
