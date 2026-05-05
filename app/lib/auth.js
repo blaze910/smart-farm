@@ -5,8 +5,8 @@ const OTP_REQUESTS_KEY = "smartfarm_otp_requests";
 const PASSWORD_RESET_SESSION_KEY = "smartfarm_password_reset";
 const REQUEST_WINDOW_MS = 15 * 60 * 1000;
 const MAX_OTP_REQUESTS = 3;
-const OTP_EXPIRATION_MS = 5 * 60 * 1000;
-const RESET_CODE_TIMEOUT_MS = 2 * 60 * 1000;
+const OTP_EXPIRATION_MS = 3 * 60 * 1000;
+const RESET_CODE_TIMEOUT_MS = 1 * 60 * 1000;
 
 function getStorage() {
   if (typeof window === "undefined") return null;
