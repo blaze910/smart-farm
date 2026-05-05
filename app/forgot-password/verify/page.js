@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sendPasswordResetOtp, verifyPasswordResetOtp } from "../../lib/auth";
 
-export default function VerifyOtpPage() {
+// 1. ALL LOGIC AND UI MOVED HERE
+function VerifyOtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
@@ -152,5 +153,14 @@ export default function VerifyOtpPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+// 2. THE MAIN EXPORT WRAPS IT IN SUSPENSE
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }
