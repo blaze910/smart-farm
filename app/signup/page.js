@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getCurrentUser, registerUser } from "../lib/auth";
+import { registerUser } from "../lib/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -14,11 +14,6 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    if (getCurrentUser()) {
-      router.replace("/dashboard");
-    }
-  }, [router]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -55,10 +50,10 @@ export default function SignupPage() {
             {success ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
             <label className="block text-sm text-slate-300">
-              Full name / Username
+              Username
               <input
                 type="text"
-                placeholder="example"
+                placeholder="What should we call you"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 className="mt-2 w-full rounded-3xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20"
@@ -83,7 +78,7 @@ export default function SignupPage() {
               <div className="relative mt-2">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder=". . . . . ."
+                  placeholder="*****"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   minLength={6}

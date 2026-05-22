@@ -8,6 +8,8 @@ const MAX_OTP_REQUESTS = 3;
 const OTP_EXPIRATION_MS = 3 * 60 * 1000;
 const RESET_CODE_TIMEOUT_MS = 1 * 60 * 1000;
 
+
+
 function getStorage() {
   if (typeof window === "undefined") return null;
   return window.localStorage;
@@ -152,7 +154,7 @@ export async function registerUser({ name, email, password }) {
   );
 
   if (existing) {
-    return { success: false, message: "This username or email is already registered." };
+    return { success: false, message: "This username or email is already registered."};
   }
 
   const hashedPassword = await hashPassword(password);
@@ -219,7 +221,7 @@ export async function sendPasswordResetOtp(email) {
     return { success: false, message: "No account is registered with that email." };
   }
 
-  const response = { success: true, message: "If an account exists, a code was sent." };
+  const response = { success: true, message: "Verification code sent." };
 
   if (recent.length < MAX_OTP_REQUESTS) {
     recent.push(now);

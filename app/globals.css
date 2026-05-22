@@ -6,10 +6,6 @@
   background-color: #020617;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   min-height: 100vh;
   margin: 0;

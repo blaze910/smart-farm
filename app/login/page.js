@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getCurrentUser, loginUser } from "../lib/auth";
+import { loginUser } from "../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,11 +14,6 @@ export default function LoginPage() {
   const [success, setSuccess] = useState("");
   const [redirecting, setRedirecting] = useState(false);
 
-  useEffect(() => {
-    if (getCurrentUser()) {
-      router.replace("/dashboard");
-    }
-  }, [router]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -54,11 +49,11 @@ export default function LoginPage() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error ? <div className="rounded-3xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
-            {redirecting ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">Redirecting to signup...</div> : null}
+            {redirecting ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">Join us today....</div> : null}
             {success ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
             <label className="block text-sm text-slate-300">
-              Email / Username
+              Email or Username
               <input
                 type="text"
                 value={identifier}
@@ -118,7 +113,7 @@ export default function LoginPage() {
             <p>
               Don&apos;t have an account?{' '}
               <Link href="/signup" className="font-semibold text-emerald-300 hover:text-emerald-200">
-                Create one
+                Join us today.
               </Link>
             </p>
           </div>

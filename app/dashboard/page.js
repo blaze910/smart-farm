@@ -48,7 +48,7 @@ export default function DashboardPage() {
                 {user.isNew ? `Welcome, ${user.name}` : `Welcome back, ${user.name}`}
               </h1>
               <p className="mx-auto max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
-                You are signed in with {user.email}. Use the dashboard to explore weather updates, crop forecasts, and smart farming insights.
+                You are signed in as {user.email}. Use the dashboard to explore weather updates, crop forecasts, and smart farming insights.
               </p>
             </div>
 
