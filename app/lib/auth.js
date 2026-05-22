@@ -149,12 +149,21 @@ export async function registerUser({ name, email, password }) {
   const normalizedUsername = normalizedName.toLowerCase().replace(/\s+/g, "");
   const normalizedEmail = email.toLowerCase().trim();
   const users = loadUsers();
-  const existing = users.find(
-    (user) => user.username === normalizedUsername || (user.email && user.email === normalizedEmail)
+  const existingUsername = users.find((user) => user.username === normalizedUsername);
+  const existingEmail = users.find(
+    (user) => user.email && user.email.toLowerCase().trim() === normalizedEmail
   );
 
-  if (existing) {
-    return { success: false, message: "This username or email is already registered."};
+  if (existingUsername && existingEmail) {
+    return { success: false, message: "This username and email is already registered." };
+  }
+
+  if (existingUsername) {
+    return { success: false, message: "This username is already registered." };
+  }
+
+  if (existingEmail) {
+    return { success: false, message: "This email is already registered." };
   }
 
   const hashedPassword = await hashPassword(password);
@@ -189,12 +198,12 @@ export async function loginUser({ identifier, password }) {
   });
 
   if (!matchedUser) {
-    return { success: false, message: "Invalid identifier or password." };
+    return { success: false, message: "Invalid identifier or password.", shouldRedirect: true };
   }
 
   const passwordMatches = await isPasswordMatch(matchedUser.password, password);
   if (!passwordMatches) {
-    return { success: false, message: "Invalid identifier or password." };
+    return { success: false, message: "Wrong password.", shouldRedirect: false };
   }
 
   setSession({

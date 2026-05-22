@@ -24,8 +24,10 @@ export default function LoginPage() {
 
     if (!result.success) {
       setError(result.message);
-      setRedirecting(true);
-      setTimeout(() => router.push("/signup"), 1200);
+      if (result.shouldRedirect) {
+        setRedirecting(true);
+        setTimeout(() => router.push("/signup"), 1200);
+      }
       return;
     }
 

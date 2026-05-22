@@ -66,6 +66,17 @@ a {
   -webkit-backdrop-filter: blur(22px) saturate(150%);
 }
 
+/* Hide browser's native password reveal button */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-outer-spin-button,
+input[type="password"]::-webkit-inner-spin-button {
+  display: none !important;
+}
+
+input[type="password"]::-ms-reveal {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

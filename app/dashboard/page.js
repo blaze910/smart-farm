@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser, logout, markUserAsReturning } from "../lib/auth";
+import GlobalMapSection from "../Components/GlobalMapSection";
+import TinyBoxGrid from "../Components/TinyBoxGrid";
 
 export default function DashboardPage() {
   const [user] = useState(() => getCurrentUser());
@@ -38,8 +40,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col justify-center px-6 py-12 sm:px-8">
+    <main className="min-h-screen bg-gray-900 text-slate-100">
+      <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-10 px-6 py-12 sm:px-8">
         <div className="glass-card rounded-[2rem] border border-white/10 bg-slate-900/80 p-8 shadow-xl shadow-slate-950/30 backdrop-blur-xl sm:p-10">
           <div className="flex flex-col gap-8">
             <div className="space-y-4 text-center">
@@ -48,21 +50,21 @@ export default function DashboardPage() {
                 {user.isNew ? `Welcome, ${user.name}` : `Welcome back, ${user.name}`}
               </h1>
               <p className="mx-auto max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
-                You are signed in as {user.email}. Use the dashboard to explore weather updates, crop forecasts, and smart farming insights.
+                You are signed in as {user.email}. Use the dashboard to explore weather updates, crop forecasts, market pricing, and pest risk alerts.
               </p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/50 p-6 shadow-lg shadow-slate-950/20">
-                <h2 className="text-xl font-semibold text-white">Access farm insights</h2>
+                <h2 className="text-xl font-semibold text-white">Farm intelligence at a glance</h2>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Your session is stored locally so you can return quickly to the dashboard without external auth.
+                  Monitor geography, climate, soil, and pest risk from a single dashboard built for modern farming.
                 </p>
               </div>
               <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/50 p-6 shadow-lg shadow-slate-950/20">
-                <h2 className="text-xl font-semibold text-white">Manage your account</h2>
+                <h2 className="text-xl font-semibold text-white">Quick actions</h2>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
-                  Sign out when you&apos;re finished or return to the homepage for extra features.
+                  Use the map search, jump into sections, and keep your farm operations moving with premium hover interactions.
                 </p>
               </div>
             </div>
@@ -84,6 +86,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <GlobalMapSection />
+        <TinyBoxGrid />
       </div>
     </main>
   );
