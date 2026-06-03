@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { resetPassword, getResetSession } from "../../lib/auth";
 
-// 1. All your logic and HTML go here
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -99,7 +98,6 @@ function ResetPasswordContent() {
   );
 }
 
-// 2. The main page component wraps the content in Suspense
 export default function ResetPasswordPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>

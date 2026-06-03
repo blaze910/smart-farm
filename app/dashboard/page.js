@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser, logout, markUserAsReturning } from "../lib/auth";
-import GlobalMapSection from "../Components/GlobalMapSection";
-import TinyBoxGrid from "../Components/TinyBoxGrid";
+
 
 export default function DashboardPage() {
   const [user] = useState(() => getCurrentUser());
@@ -75,7 +74,7 @@ export default function DashboardPage() {
                 onClick={handleSignOut}
                 className="inline-flex w-full items-center justify-center rounded-full bg-rose-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-rose-400 sm:w-auto"
               >
-                Sign Out
+                Log Out
               </button>
               <Link
                 href="/"
@@ -86,9 +85,6 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        <GlobalMapSection />
-        <TinyBoxGrid />
       </div>
     </main>
   );

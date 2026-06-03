@@ -13,16 +13,19 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [redirecting, setRedirecting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     const result = await loginUser({ identifier, password });
 
     if (!result.success) {
+      setLoading(false);
       setError(result.message);
       if (result.shouldRedirect) {
         setRedirecting(true);
@@ -32,7 +35,11 @@ export default function LoginPage() {
     }
 
     setSuccess(result.message);
-    router.push("/dashboard");
+    setRedirecting(true);
+
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 600);
   };
 
   return (
@@ -42,7 +49,7 @@ export default function LoginPage() {
       <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-12 sm:px-8">
         <div className="glass-card glass-strong relative overflow-hidden rounded-[2rem] border border-white/15 bg-slate-950/25 p-8 shadow-2xl shadow-slate-950/40 backdrop-blur-3xl sm:p-10">
           <div className="mb-8 text-center">
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/80">Login to SmartFarm</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/80">Login to FarmPulse</p>
             <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">Sign in to your account</h1>
             <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
               Access the dashboard with your registered email and password.
@@ -51,7 +58,9 @@ export default function LoginPage() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error ? <div className="rounded-3xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
-            {redirecting ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">Join us today....</div> : null}
+            {loading && !success ? (
+              <div className="rounded-3xl bg-slate-800/80 px-4 py-3 text-sm text-emerald-200">Signing in...</div>
+            ) : null}
             {success ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
             <label className="block text-sm text-slate-300">
@@ -102,9 +111,21 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+              disabled={loading}
+              aria-busy={loading}
+              className="w-full rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Login
+              {loading ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg className="h-5 w-5 animate-spin text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9" strokeOpacity="0.2" />
+                    <path d="M21 12a9 9 0 0 1-9 9" />
+                  </svg>
+                  Logging in...
+                </span>
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
 

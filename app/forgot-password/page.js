@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
             <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/80">Forgot Password</p>
             <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">Reset your access</h1>
             <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-              Enter your email and we will send a secure code if your account exists.
+              Enter your email and we will send a secure 6-digit one-time code if your account exists.
             </p>
           </div>
 

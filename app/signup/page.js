@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerUser } from "../lib/auth";
@@ -38,10 +38,10 @@ export default function SignupPage() {
       <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col justify-center px-6 py-12 sm:px-8">
         <div className="glass-card glass-strong relative overflow-hidden rounded-[2rem] border border-white/15 bg-slate-950/25 p-8 shadow-2xl shadow-slate-950/40 backdrop-blur-3xl sm:p-10">
           <div className="mb-8 text-center">
-            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/80">Sign up for SmartFarm</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/80">Sign up for FarmPulse</p>
             <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">Create your new account</h1>
             <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-              Register with your email and start using the dashboard immediately.
+              Register with your email and start using FarmPulse today.
             </p>
           </div>
 

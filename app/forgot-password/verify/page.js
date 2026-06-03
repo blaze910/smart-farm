@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { sendPasswordResetOtp, verifyPasswordResetOtp } from "../../lib/auth";
 
-// 1. ALL LOGIC AND UI MOVED HERE
+// 1. ALL LOGIC AND UI 
 function VerifyOtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -13,9 +13,9 @@ function VerifyOtpContent() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [timer, setTimer] = useState(120);
+  const [timer, setTimer] = useState(0);
+  const [showResendCountdown, setShowResendCountdown] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [resendKey, setResendKey] = useState(0);
 
   useEffect(() => {
     if (!email) {
@@ -24,6 +24,13 @@ function VerifyOtpContent() {
   }, [email, router]);
 
   useEffect(() => {
+    if (timer <= 0) {
+      if (showResendCountdown) {
+        setShowResendCountdown(false);
+      }
+      return undefined;
+    }
+
     const interval = setInterval(() => {
       setTimer((current) => {
         if (current <= 1) {
@@ -34,7 +41,7 @@ function VerifyOtpContent() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [resendKey]);
+  }, [timer, showResendCountdown]);
 
   const formattedCode = useMemo(() => code.join(""), [code]);
 
@@ -94,7 +101,8 @@ function VerifyOtpContent() {
     }
 
     setMessage(result.message || "If an account exists, a code was sent.");
-    setResendKey((current) => current + 1);
+    setTimer(60);
+    setShowResendCountdown(true);
   };
 
   return (
@@ -107,7 +115,7 @@ function VerifyOtpContent() {
             <p className="text-sm uppercase tracking-[0.35em] text-emerald-300/80">Verify code</p>
             <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl">Enter your 6-digit code</h1>
             <p className="mt-3 text-sm leading-6 text-slate-400 sm:text-base">
-              We sent a verification code to {email}. It will expire in 2 minutes.
+              We sent a verification code to {email}. It will expire in 3 minutes.
             </p>
           </div>
 
@@ -133,7 +141,11 @@ function VerifyOtpContent() {
             </div>
 
             <div className="flex flex-col gap-3 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-              <span>Resend available in {timer}s</span>
+              {showResendCountdown && timer > 0 ? (
+                <span>Resend available in {timer}s</span>
+              ) : (
+                <span className="text-slate-400">You can request a new code.</span>
+              )}
               <button
                 type="button"
                 onClick={handleResend}

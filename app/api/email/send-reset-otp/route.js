@@ -1,46 +1,90 @@
-import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_SERVER,
-  port: Number(process.env.EMAIL_PORT || 587),
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+function parseBoolean(value) {
+  return String(value).toLowerCase() === "true";
+}
+
+function getEmailConfig() {
+  return {
+    host: process.env.EMAIL_SERVER,
+    port: Number(process.env.EMAIL_PORT ?? 587),
+    secure: parseBoolean(process.env.EMAIL_SECURE),
+    auth: {
+      user: process.env.EMAIL_USERNAME,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  };
+}
+
+async function sendEmailWithRetry(transporter, mailOptions, maxRetries = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await transporter.sendMail(mailOptions);
+      return { success: true };
+    } catch (error) {
+      lastError = error;
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt - 1) * 1000; // Exponential backoff: 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  return { success: false, error: lastError };
+}
+
+function getErrorMessage(error, isDevelopment) {
+  if (isDevelopment) {
+    return `SMTP Error: ${error.message}`;
+  }
+  return "Failed to send verification code. Please try again later.";
+}
 
 export async function POST(request) {
-  const body = await request.json();
-  const email = body?.email?.toString().trim().toLowerCase();
-  const otp = body?.otp?.toString().trim();
-
-  if (!email || !otp) {
-    return NextResponse.json({ success: false, message: "Missing email or OTP." }, { status: 400 });
-  }
-
-  if (!process.env.EMAIL_SERVER || !process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
-    console.error("Email configuration missing. Check EMAIL_SERVER, EMAIL_USERNAME, and EMAIL_PASSWORD.");
-    return NextResponse.json({ success: false, message: "Email provider is not configured." }, { status: 500 });
-  }
-
-  const from = process.env.EMAIL_FROM || process.env.EMAIL_USERNAME || "no-reply@smartfarm.local";
-  const subject = "SmartFarm Password Reset Code";
-  const text = `Your SmartFarm password reset code is ${otp}. Use this code to reset your password.`;
-  const html = `<div style="font-family: sans-serif; line-height: 1.6; color: #111;"><h2>SmartFarm Password Reset</h2><p>Your code is <strong>${otp}</strong>.</p><p>If you didn't request this, you can ignore this email.</p></div>`;
-
   try {
-    await transporter.sendMail({
+    const { email, otp } = await request.json();
+
+    if (!email || !otp) {
+      return NextResponse.json(
+        { success: false, message: "Missing email or OTP in request payload." },
+        { status: 400 }
+      );
+    }
+
+    const emailConfig = getEmailConfig();
+    if (!emailConfig.host || !emailConfig.auth.user || !emailConfig.auth.pass) {
+      return NextResponse.json(
+        { success: false, message: "Email provider is not configured. Check SMTP environment variables." },
+        { status: 500 }
+      );
+    }
+
+    const transporter = nodemailer.createTransport(emailConfig);
+    const from = process.env.EMAIL_FROM || process.env.EMAIL_USERNAME;
+    const mailOptions = {
       from,
       to: email,
-      subject,
-      text,
-      html,
-    });
-    return NextResponse.json({ success: true, message: "Email sent." });
+      subject: "SmartFarm password reset code",
+      text: `Your SmartFarm password reset code is ${otp}. It expires in 3 minutes.`,
+      html: `<p>Your SmartFarm password reset code is <strong>${otp}</strong>.</p><p>This code expires in 3 minutes.</p>`,
+    };
+
+    const result = await sendEmailWithRetry(transporter, mailOptions);
+
+    if (!result.success) {
+      const isDev = process.env.NODE_ENV === "development";
+      const message = getErrorMessage(result.error, isDev);
+      console.error("Email send failed after retries:", result.error);
+      return NextResponse.json({ success: false, message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, message: "Verification code sent." });
   } catch (error) {
-    console.error("Email send failed:", error);
-    return NextResponse.json({ success: false, message: error?.message || "Unable to send email." }, { status: 500 });
+    console.error("Error sending reset OTP email:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to send verification code. Please try again later." },
+      { status: 500 }
+    );
   }
 }

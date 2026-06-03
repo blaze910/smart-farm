@@ -230,7 +230,7 @@ export async function sendPasswordResetOtp(email) {
     return { success: false, message: "No account is registered with that email." };
   }
 
-  const response = { success: true, message: "Verification code sent." };
+  const response = { success: true, message: "Verification code sent, please check your email." };
 
   if (recent.length < MAX_OTP_REQUESTS) {
     recent.push(now);

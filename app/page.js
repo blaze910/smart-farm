@@ -12,7 +12,7 @@ export default function Home() {
                 Smart Farming Dashboard
               </p>
               <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                Welcome to SmartFarm
+                Welcome to FarmPulse
               </h1>
               <p className="mx-auto max-w-3xl text-base leading-7 text-slate-300 sm:text-lg lg:text-xl">
                 Explore a modern web experience built for precision agriculture, crop insight, and weather-aware farming.
@@ -74,7 +74,7 @@ export default function Home() {
                   <path d="M12 7v5l3 3" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-white">Real-time Alerts</h3>
+              <h3 className="text-lg font-semibold text-white">Real-time Pest Alerts</h3>
               <p className="text-sm leading-6 text-slate-300">Stay ahead with weather, pest, and crop warning notifications tailored to your fields.</p>
             </article>
             <article className="space-y-4 rounded-[1.75rem] border border-white/10 bg-slate-950/50 p-6 backdrop-blur-xl">
