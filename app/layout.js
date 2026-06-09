@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "FarmPulse",
   description: "Smart Farming Dashboard for Real-Time Crop Monitoring and Management",
-  manifest: "/site.webmanifest",
+  manifest: "/site.webmanifest", 
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

@@ -198,12 +198,12 @@ export async function loginUser({ identifier, password }) {
   });
 
   if (!matchedUser) {
-    return { success: false, message: "Invalid identifier or password.", shouldRedirect: true };
+    return { success: false, message: "Invalid login credentials.", shouldRedirect: true };
   }
 
   const passwordMatches = await isPasswordMatch(matchedUser.password, password);
   if (!passwordMatches) {
-    return { success: false, message: "Wrong password.", shouldRedirect: false };
+    return { success: false, message: "Wrong password", shouldRedirect: false };
   }
 
   setSession({
@@ -214,7 +214,7 @@ export async function loginUser({ identifier, password }) {
     isNew: false,
   });
 
-  return { success: true, message: "Login successful.", user: matchedUser };
+  return { success: true, message: "Success", user: matchedUser };
 }
 
 export async function sendPasswordResetOtp(email) {
@@ -310,6 +310,84 @@ export async function resetPassword({ email, password }) {
   removeOtpData();
 
   return { success: true, message: "Password updated successfully." };
+}
+
+export async function updateUserProfile({ email, name, avatar }) {
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedName = (name || "").trim();
+
+  if (!normalizedEmail || !normalizedName) {
+    return { success: false, message: "Name and email are required." };
+  }
+
+  const users = loadUsers();
+  const userIndex = users.findIndex((item) => normalizeEmail(item.email) === normalizedEmail);
+
+  if (userIndex === -1) {
+    return { success: false, message: "Profile update failed." };
+  }
+
+  const updatedUser = {
+    ...users[userIndex],
+    name: normalizedName,
+    username: normalizedName.toLowerCase().replace(/\s+/g, ""),
+    avatar: avatar || users[userIndex].avatar || "",
+  };
+
+  users[userIndex] = updatedUser;
+  saveUsers(users);
+
+  const session = getCurrentUser();
+  if (session) {
+    setSession({
+      ...session,
+      ...updatedUser,
+      name: updatedUser.name,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      avatar: updatedUser.avatar,
+      isNew: Boolean(session.isNew),
+    });
+  }
+
+  return { success: true, user: updatedUser, message: "Profile updated." };
+}
+
+export async function updateUserPassword({ email, currentPassword, newPassword }) {
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!normalizedEmail || !currentPassword || !newPassword) {
+    return { success: false, message: "Current and new password are required." };
+  }
+
+  if (newPassword.length < 6 || newPassword.length > 16) {
+    return { success: false, message: "Password must be between 6 and 16 characters." };
+  }
+
+  const users = loadUsers();
+  const user = users.find((item) => normalizeEmail(item.email) === normalizedEmail);
+
+  if (!user) {
+    return { success: false, message: "Account not found." };
+  }
+
+  const passwordMatches = await isPasswordMatch(user.password, currentPassword);
+  if (!passwordMatches) {
+    return { success: false, message: "Current password is incorrect." };
+  }
+
+  user.password = await hashPassword(newPassword);
+  saveUsers(users);
+
+  return { success: true, message: "Password updated successfully." };
+}
+
+export function deleteUserAccount(email) {
+  const normalizedEmail = normalizeEmail(email);
+  const users = loadUsers().filter((item) => normalizeEmail(item.email) !== normalizedEmail);
+  saveUsers(users);
+  logout();
+  return { success: true, message: "Account deleted." };
 }
 
 export function markUserAsReturning(user) {

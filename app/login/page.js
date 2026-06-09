@@ -34,12 +34,15 @@ export default function LoginPage() {
       return;
     }
 
-    setSuccess(result.message);
     setRedirecting(true);
 
     setTimeout(() => {
-      router.push("/dashboard");
-    }, 600);
+      setLoading(false);
+      setSuccess(result.message);
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 900);
+    }, 1200);
   };
 
   return (
@@ -121,7 +124,7 @@ export default function LoginPage() {
                     <circle cx="12" cy="12" r="9" strokeOpacity="0.2" />
                     <path d="M21 12a9 9 0 0 1-9 9" />
                   </svg>
-                  Logging in...
+                  Please wait...
                 </span>
               ) : (
                 "Login"

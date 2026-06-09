@@ -13,9 +13,12 @@ function VerifyOtpContent() {
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
   const [timer, setTimer] = useState(0);
   const [showResendCountdown, setShowResendCountdown] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const redirectTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (!email) {
@@ -42,6 +45,14 @@ function VerifyOtpContent() {
     }, 1000);
     return () => clearInterval(interval);
   }, [timer, showResendCountdown]);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const formattedCode = useMemo(() => code.join(""), [code]);
 
@@ -73,24 +84,34 @@ function VerifyOtpContent() {
     event.preventDefault();
     setError("");
     setMessage("");
+    setIsVerified(false);
 
     if (formattedCode.length !== 6) {
       setError("Enter the full 6-digit code.");
       return;
     }
 
+    setIsVerifying(true);
     const result = await verifyPasswordResetOtp({ email, code: formattedCode });
+    setIsVerifying(false);
+
     if (!result.success) {
       setError(result.message);
+      setIsVerified(false);
       return;
     }
 
-    router.push(`/forgot-password/reset?email=${encodeURIComponent(email)}`);
+    setIsVerified(true);
+    setMessage("Verified");
+    redirectTimeoutRef.current = window.setTimeout(() => {
+      router.push(`/forgot-password/reset?email=${encodeURIComponent(email)}`);
+    }, 1500);
   };
 
   const handleResend = async () => {
     setError("");
     setMessage("");
+    setIsVerified(false);
     setIsSending(true);
     const result = await sendPasswordResetOtp(email);
     setIsSending(false);
@@ -101,6 +122,8 @@ function VerifyOtpContent() {
     }
 
     setMessage(result.message || "If an account exists, a code was sent.");
+    setCode(["", "", "", "", "", ""]);
+    focusInput(0);
     setTimer(60);
     setShowResendCountdown(true);
   };
@@ -121,7 +144,18 @@ function VerifyOtpContent() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error ? <div className="rounded-3xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
-            {message ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{message}</div> : null}
+            {message ? (
+              <div className="flex items-center gap-3 rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                {isVerified ? (
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100/10 text-white ring-1 ring-white/20">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 12.5l4 4 8-8" />
+                    </svg>
+                  </span>
+                ) : null}
+                <span>{message}</span>
+              </div>
+            ) : null}
 
             <div className="grid grid-cols-6 gap-3">
               {code.map((digit, index) => (
@@ -157,9 +191,10 @@ function VerifyOtpContent() {
             </div>
             <button
               type="submit"
-              className="w-full rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+              disabled={isVerifying}
+              className="w-full rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Verify code
+              {isVerifying ? "Verifying..." : "Verify code"}
             </button>
           </form>
         </div>
@@ -167,8 +202,7 @@ function VerifyOtpContent() {
     </main>
   );
 }
-
-// 2. THE MAIN EXPORT WRAPS IT IN SUSPENSE
+//Wraps the content in Suspense to allow for future async data fetching if needed, while currently just showing a loading state on initial render.
 export default function VerifyOtpPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>

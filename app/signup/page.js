@@ -13,22 +13,30 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
 
     const result = await registerUser({ name, email, password });
 
     if (!result.success) {
+      setLoading(false);
       setError(result.message);
       return;
     }
 
-    setSuccess(result.message);
-    router.push("/dashboard");
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(result.message);
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 900);
+    }, 1200);
   };
 
   return (
@@ -47,6 +55,9 @@ export default function SignupPage() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error ? <div className="rounded-3xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
+            {loading && !success ? (
+              <div className="rounded-3xl bg-slate-800/80 px-4 py-3 text-sm text-emerald-200">Please wait while we set up your account...</div>
+            ) : null}
             {success ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
             <label className="block text-sm text-slate-300">
@@ -115,9 +126,21 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="w-full rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300"
+              disabled={loading}
+              aria-busy={loading}
+              className="w-full rounded-full bg-emerald-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Create account
+              {loading ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg className="h-5 w-5 animate-spin text-slate-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9" strokeOpacity="0.2" />
+                    <path d="M21 12a9 9 0 0 1-9 9" />
+                  </svg>
+                  Please wait...
+                </span>
+              ) : (
+                "Create account"
+              )}
             </button>
           </form>
 
