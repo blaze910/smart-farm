@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const [location, setLocation] = useState("");
   const [activeLocation, setActiveLocation] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [statusText, setStatusText] = useState("Enter a location and tap run to load live farming insights.");
   const [cropData, setCropData] = useState(null);
   const [weatherData, setWeatherData] = useState(null);
@@ -50,16 +51,42 @@ export default function DashboardPage() {
     router.push("/login");
   };
 
-  const handleProfileImageChange = (event) => {
+  const compressImage = (file, maxWidth = 480, quality = 0.78) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const scale = Math.min(1, maxWidth / Math.max(image.width, 1));
+        canvas.width = Math.max(1, Math.floor(image.width * scale));
+        canvas.height = Math.max(1, Math.floor(image.height * scale));
+
+        const context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      image.onerror = () => reject(new Error("Unable to read image file."));
+      image.src = reader.result;
+    };
+
+    reader.onerror = () => reject(new Error("Unable to open image file."));
+    reader.readAsDataURL(file);
+  });
+
+  const handleProfileImageChange = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProfileImage(reader.result);
-      setStatusMessage("Profile image uploaded");
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressedImage = await compressImage(file);
+      setProfileImage(compressedImage);
+      setStatusMessage("Profile image ready to save.");
+    } catch (error) {
+      setStatusMessage(error.message || "Unable to read profile image.");
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -68,19 +95,31 @@ export default function DashboardPage() {
       return;
     }
 
-    const result = await updateUserProfile({
-      email: user.email,
-      name: profileName.trim(),
-      avatar: profileImage || user.avatar || "",
-    });
+    setIsSavingProfile(true);
+    setStatusMessage("Saving profile... Please wait.");
 
-    if (!result.success) {
-      setStatusMessage(result.message || "Unable to update profile.");
-      return;
+    try {
+      const result = await updateUserProfile({
+        email: user.email,
+        name: profileName.trim(),
+        avatar: profileImage || user.avatar || "",
+      });
+
+      if (!result.success) {
+        setStatusMessage(result.message || "Unable to update profile.");
+        return;
+      }
+
+      setUser((prev) => ({
+        ...prev,
+        name: profileName.trim(),
+        username: profileName.trim().toLowerCase().replace(/\s+/g, ""),
+        avatar: profileImage || prev.avatar || "",
+      }));
+      setStatusMessage("Profile updated");
+    } finally {
+      setIsSavingProfile(false);
     }
-
-    setUser((prev) => ({ ...prev, name: profileName.trim(), avatar: profileImage || prev.avatar || "" }));
-    setStatusMessage("Profile updated");
   };
 
   const handlePasswordChange = async () => {
@@ -316,12 +355,8 @@ export default function DashboardPage() {
               <>
                 <p className="text-xs uppercase tracking-[0.35em] text-[#31572C]">Profile</p>
                 <div className="rounded-[1.2rem] bg-white p-3 shadow-sm text-sm text-slate-600">
-                  Update your profile
+                  Update your profile and use the avatar above to change your photo.
                 </div>
-                <label className="block cursor-pointer rounded-[1.2rem] border border-dashed border-[#31572C]/40 bg-white p-4 text-center text-sm text-slate-600 transition hover:border-[#31572C] hover:bg-[#31572C]/5">
-                  <input type="file" accept="image/*" className="hidden" onChange={handleProfileImageChange} />
-                  Upload profile image
-                </label>
                 <label className="space-y-1 text-sm text-slate-600">
                   Username 
                   <input
@@ -334,9 +369,10 @@ export default function DashboardPage() {
                 <button
                   type="button"
                   onClick={handleSaveProfile}
-                  className="w-full rounded-full bg-[#31572C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#214c1f]"
+                  disabled={isSavingProfile}
+                  className="w-full rounded-full bg-[#31572C] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#214c1f] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Save profile
+                  {isSavingProfile ? "Saving profile..." : "Save profile"}
                 </button>
               </>
             ) : null}
@@ -589,8 +625,8 @@ export default function DashboardPage() {
             </div>
 
             <div className="mt-6 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
-              <p className="text-xs uppercase tracking-[0.3em] text-[#31572C]">Planting suggestions</p>
-              <h3 className="mt-3 text-lg font-semibold text-slate-950">Where, and when to plant</h3>
+              <p className="text-xs uppercase tracking-[0.3em] text-[#31572C]">Suggestions and Solutions</p>
+              <h3 className="mt-3 text-lg font-semibold text-slate-950">What to do</h3>
               <div className="mt-4 space-y-3 text-sm text-slate-600">
                 {plantingSuggestions?.map((item, index) => (
                   <div key={index} className="rounded-3xl bg-white p-4 shadow-sm">

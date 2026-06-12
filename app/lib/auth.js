@@ -28,14 +28,28 @@ function loadUsers() {
 
 function saveUsers(users) {
   const storage = getStorage();
-  if (!storage) return;
-  storage.setItem(USERS_KEY, JSON.stringify(users));
+  if (!storage) return false;
+
+  try {
+    storage.setItem(USERS_KEY, JSON.stringify(users));
+    return true;
+  } catch (error) {
+    console.error("Unable to save user data:", error);
+    return false;
+  }
 }
 
 function setSession(session) {
   const storage = getStorage();
-  if (!storage) return;
-  storage.setItem(SESSION_KEY, JSON.stringify(session));
+  if (!storage) return false;
+
+  try {
+    storage.setItem(SESSION_KEY, JSON.stringify(session));
+    return true;
+  } catch (error) {
+    console.error("Unable to save session:", error);
+    return false;
+  }
 }
 
 function getOtpData() {
@@ -190,9 +204,11 @@ export async function loginUser({ identifier, password }) {
   const users = loadUsers();
   const matchedUser = users.find((user) => {
     const hasEmail = typeof user.email === "string" && user.email.trim().length > 0;
+    const normalizedUsername = (user.username || "").toLowerCase().trim();
+    const normalizedName = (user.name || "").toLowerCase().trim();
     return (
-      user.username === normalizedIdentifier ||
-      user.name.toLowerCase().trim() === normalizedIdentifier ||
+      normalizedUsername === normalizedIdentifier ||
+      normalizedName === normalizedIdentifier ||
       (hasEmail && user.email.toLowerCase().trim() === normalizedIdentifier)
     );
   });
@@ -210,6 +226,7 @@ export async function loginUser({ identifier, password }) {
     name: matchedUser.name,
     username: matchedUser.username,
     email: matchedUser.email ?? "",
+    avatar: matchedUser.avatar || "",
     token: generateToken(matchedUser.username),
     isNew: false,
   });
@@ -335,11 +352,18 @@ export async function updateUserProfile({ email, name, avatar }) {
   };
 
   users[userIndex] = updatedUser;
-  saveUsers(users);
+
+  const savedUsers = saveUsers(users);
+  if (!savedUsers) {
+    return {
+      success: false,
+      message: "Profile could not be saved on this device. Please use a smaller image or clear some saved data and try again.",
+    };
+  }
 
   const session = getCurrentUser();
   if (session) {
-    setSession({
+    const sessionUpdated = setSession({
       ...session,
       ...updatedUser,
       name: updatedUser.name,
@@ -347,7 +371,15 @@ export async function updateUserProfile({ email, name, avatar }) {
       email: updatedUser.email,
       avatar: updatedUser.avatar,
       isNew: Boolean(session.isNew),
+      token: session.token || generateToken(updatedUser.email),
     });
+
+    if (!sessionUpdated) {
+      return {
+        success: false,
+        message: "Profile updated in your account, but your current session could not be refreshed. Please sign in again.",
+      };
+    }
   }
 
   return { success: true, user: updatedUser, message: "Profile updated." };

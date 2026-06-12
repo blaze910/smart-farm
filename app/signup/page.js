@@ -31,12 +31,8 @@ export default function SignupPage() {
     }
 
     setTimeout(() => {
-      setLoading(false);
-      setSuccess(result.message);
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 900);
-    }, 1200);
+      router.push("/dashboard");
+    }, 900);
   };
 
   return (
@@ -55,10 +51,9 @@ export default function SignupPage() {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error ? <div className="rounded-3xl bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
-            {loading && !success ? (
+            {loading ? (
               <div className="rounded-3xl bg-slate-800/80 px-4 py-3 text-sm text-emerald-200">Please wait while we set up your account...</div>
             ) : null}
-            {success ? <div className="rounded-3xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">{success}</div> : null}
 
             <label className="block text-sm text-slate-300">
               Username

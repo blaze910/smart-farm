@@ -92,17 +92,22 @@ function VerifyOtpContent() {
     }
 
     setIsVerifying(true);
+    setMessage("Please wait while we verify your code...");
+
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+
     const result = await verifyPasswordResetOtp({ email, code: formattedCode });
     setIsVerifying(false);
 
     if (!result.success) {
       setError(result.message);
+      setMessage("");
       setIsVerified(false);
       return;
     }
 
     setIsVerified(true);
-    setMessage("Verified");
+    setMessage("Verified successfully.");
     redirectTimeoutRef.current = window.setTimeout(() => {
       router.push(`/forgot-password/reset?email=${encodeURIComponent(email)}`);
     }, 1500);
